@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <title>Birthday</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <style type="text/css">
+      body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #282c35;
+        color: #fff;
+        font-family: "Arial", sans-serif;
+      }
+
+      #photoContainer {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+      }
+
+      .arrow {
+        font-size: 24px;
+        color: white;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        z-index: 2;
+      }
+
+      .left {
+        left: 10px;
+      }
+
+      .right {
+        right: 10px;
+      }
+
+      #photo {
+        max-width: 100%;
+        height: auto;
+        z-index: 1;
+      }
+
+      .instruction {
+        text-align: center;
+        color: white;
+        margin-top: 10px;
+        z-index: 2;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 24px;
+      }
+
+      p {
+        text-align: center;
+      }
+
+      #canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+      }
+      h1,
+      p,
+      .code,
+      img,
+      .copyright {
+        margin: 10px;
+        position: relative;
+        z-index: 1;
+        text-align: center;
+      }
+
+      .copyright {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas" style="border: 0px"></canvas>
+
+    <div id="photoContainer">
+      <h1>Поздравляем Вас С Днём Рождения!</h1>
+      <p>
+        С XV века в мире стали пускать фейерверки во время всевозможных
+        торжеств. В Россию фейверки пришли из Голландии во второй половине XVII
+        века. Первый масштабный фейверверк был запущен в 1674 году в Устюге.
+      </p>
+      <p>
+        В наше время, практически все фейерверки производятся в Китае. Китайское
+        производство не всегда обеспечивает безопасность в эксплуатации своей
+        продукции, поэтому, во избежании трамв, в честь вашего дня рождения, мы
+        с родителями решили отказаться от запуска фейерверка в реальном мире,
+        тем самым, придя к более безопасной альтернативе в виде цифрового
+        аналога.
+      </p>
+
+      <span class="arrow left" onclick="prevPhoto()">❮</span>
+      <img
+        id="photo"
+        alt="С Днём Рождения!"
+        src="andrey1.jpg?random="
+        +
+        Math.random()
+      />
+      <span class="arrow right" onclick="nextPhoto()">❯</span>
+      <p class="instruction">
+        Можно понастальгировать, посмотрев несколько фотографий
+      </p>
+    </div>
+    <div class="copyright">&copy; Vinogradov A.S. 2024</div>
+    <script>
+      var photos = [
+        "andrey1.jpg",
+        "andrey2.jpg",
+        "andrey3.jpg",
+        "andrey4.jpg",
+        "andrey5.jpg",
+        "andrey6.jpg",
+        "andrey7.jpg",
+        // Добавьте пути к другим фотографиям по аналогии
+      ];
+
+      var currentPhotoIndex = 0;
+      var photoElement = document.getElementById("photo");
+
+      function prevPhoto() {
+        currentPhotoIndex =
+          (currentPhotoIndex - 1 + photos.length) % photos.length;
+        photoElement.src =
+          photos[currentPhotoIndex] + "?random=" + Math.random();
+      }
+
+      function nextPhoto() {
+        currentPhotoIndex = (currentPhotoIndex + 1) % photos.length;
+        photoElement.src =
+          photos[currentPhotoIndex] + "?random=" + Math.random();
+      }
+    </script>
+
+    <script>
+      var c = document.getElementById("canvas");
+      var a = c.getContext("2d");
+      var W = window.innerWidth;
+      var H = window.innerHeight;
+      c.width = W;
+      c.height = H;
+      var Objects = [];
+      var Colors =
+        "255,0,0;0,255,0;0,0,255;255,255,0;255,0,255;0,255,255;255,255,204;255,204,255;204,255,255".split(
+          ";"
+        );
+      var timeInterval = 20;
+      var petardColor = "rgb(0,128,0)";
+      var numRays = 16;
+      var percentAlive = 60;
+      var petardRadius = 3;
+      var fireRadius = 31;
+      var fireBallRadius = 5;
+
+      DeleteObject = function (obj, t) {
+        if (t) delete Objects[obj];
+        else Objects[Objects.length] = obj;
+      };
+
+      DrawBack = function () {
+        a["globalCompositeOperation"] = "source-over";
+        a.fillStyle = "rgba(0,0,0,.4)";
+        a.fillRect(0, 0, W, H);
+      };
+
+      ColorPath = function (x, y, r, f) {
+        a.beginPath();
+        a.arc(x, y, r, 0, Math.PI * 2, 0);
+        a.fillStyle = f;
+        a.fill();
+      };
+
+      FinalDraw = function (k, x, y, g) {
+        this.k = k;
+        this.x = k ? x : Math.random() * (W - 200) + 100;
+        this.y = k ? y : H;
+        this.t = 0;
+        this.j = k ? 25 : 75;
+        this.a = k ? Math.random() * 360 : 240 + Math.random() * 70;
+        this.s = Math.random() * 3 + 2;
+        this.g = g;
+
+        this.thisDraw = function () {
+          this.t++;
+          if (this.k) {
+            f = (Math.PI / 180) * this.a;
+            this.x += Math.cos(f) * this.s;
+            this.y += Math.sin(f) * this.s;
+            a["globalCompositeOperation"] = "lighter";
+            g = a.createRadialGradient(
+              this.x,
+              this.y,
+              1,
+              this.x,
+              this.y,
+              fireBallRadius
+            );
+            g["addColorStop"](0, "rgba(255,255,255,.55)");
+            g["addColorStop"](1, "rgba(" + this.g + ",.03)");
+            ColorPath(this.x, this.y, fireRadius, g);
+          } else {
+            f = (Math.PI / 180) * this.a;
+            this.x += Math.cos(f) * 5;
+            this.y += Math.sin(f) * 7.5;
+            ColorPath(this.x, this.y, petardRadius, petardColor);
+          }
+        };
+      };
+
+      setInterval(function () {
+        DrawBack();
+        for (q in Objects) {
+          var obj = Objects[q];
+          obj.thisDraw();
+          if (obj.t > obj.j) {
+            if (!obj.k) {
+              h = (Math.random() * Colors.length) | 0;
+              for (c = 0; c < numRays; c++)
+                DeleteObject(new FinalDraw(1, obj.x, obj.y, Colors[h]));
+            }
+            DeleteObject(q, 1);
+          }
+        }
+        var c = Math.random() * 100;
+        if (c > percentAlive) DeleteObject(new FinalDraw());
+      }, timeInterval);
+
+      window.addEventListener("resize", function () {
+        W = window.innerWidth;
+        H = window.innerHeight;
+        c.width = W;
+        c.height = H;
+      });
+    </script>
+    <noscript>
+      <p>
+        <b>Для работы приложения нужен включённый в браузере Javascript!</b>
+      </p>
+    </noscript>
+  </body>
+</html>
